@@ -165,9 +165,8 @@ func (ps *FiberPrometheus) Middleware(ctx *fiber.Ctx) error {
 	defer func() {
 		ps.requestInFlight.WithLabelValues(method, path).Dec()
 	}()
-	if err := ctx.Next(); err != nil {
-		return err
-	}
+	
+	err := ctx.Next();
 
 	statusCode := strconv.Itoa(ctx.Response().StatusCode())
 	ps.requestsTotal.WithLabelValues(statusCode, method, path).
@@ -176,6 +175,9 @@ func (ps *FiberPrometheus) Middleware(ctx *fiber.Ctx) error {
 	elapsed := float64(time.Since(start).Nanoseconds()) / 1000000000
 	ps.requestDuration.WithLabelValues(statusCode, method, path).
 		Observe(elapsed)
-
-	return nil
+	
+	return err
+// 	if err := ctx.Next(); err != nil {
+// 		return err
+// 	}
 }
